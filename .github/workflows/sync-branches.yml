@@ -19,7 +19,7 @@ jobs:
 
       - name: Get branch list from original repository
         run: |
-          ORIGINAL_BRANCHES=$(git ls-remote --heads https://github.com/${{ github.repository_owner }}/${{ github.event.repository.name }}.git | awk -F'/' '{print $3}')
+          ORIGINAL_BRANCHES=$(git ls-remote --heads https://github.com/${{ github.event.repository.full_name }}.git | awk -F'/' '{print $3}')
 
       - name: Sync branches and collect commit information
         run: |
