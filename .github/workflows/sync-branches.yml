@@ -17,7 +17,7 @@ jobs:
 
       - name: Fetch all branches from original repository
         run: |
-          git config --get remote.upstream.url
+          echo $(git config --get remote.upstream.url)
 #          env ORIGINAL_BRANCHES=$(git ls-remote --heads $(git config --get remote.upstream.url) | awk -F'/' '{print $3}')
 
 #      - name: Sync branches and collect commit information
