@@ -17,7 +17,7 @@ jobs:
 
       - name: Fetch all branches from original repository
         run: |
-          env ORIGINAL_BRANCHES=$(git ls-remote --heads https://github.com/${{ github.event.repository.full_name }}.git | awk -F'/' '{print $3}')
+          env ORIGINAL_BRANCHES=$(git ls-remote --heads upstream | awk -F'/' '{print $3}')
 
       - name: Sync branches and collect commit information
         run: |
