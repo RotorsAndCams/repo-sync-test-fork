@@ -20,7 +20,7 @@ jobs:
 
       - name: Sync branches and collect commit information
         run: |
-          UPDATED_BRANCHES=""
+          UPDATED_BRANCHES = "0"
           for BRANCH in $ORIGINAL_BRANCHES; do
             if git rev-parse --verify --quiet $BRANCH; then
               NUM_COMMITS=$(git rev-list --count HEAD ^origin/$BRANCH)
@@ -35,7 +35,7 @@ jobs:
           done
 
       - name: Create issue with branch sync information
-        if: $UPDATED_BRANCHES != ''
+        if: $UPDATED_BRANCHES != '0'
         uses: actions/github-script@v4
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
