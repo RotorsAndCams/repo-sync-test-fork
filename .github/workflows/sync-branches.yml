@@ -17,40 +17,40 @@ jobs:
 
       - name: Fetch all branches from original repository
         run: |
-          env ORIGINAL_BRANCHES=$(git ls-remote --heads upstream | awk -F'/' '{print $3}')
+          env ORIGINAL_BRANCHES=$(git ls-remote --heads $(git config --get remote.upstream.url) | awk -F'/' '{print $3}')
 
-      - name: Sync branches and collect commit information
-        run: |
-          for BRANCH in $ORIGINAL_BRANCHES; do
-            if git rev-parse --verify --quiet $BRANCH; then
-              NUM_COMMITS=$(git rev-list --count HEAD ^origin/$BRANCH)
-              if [ $NUM_COMMITS -gt 0 ]; then
-                git checkout $BRANCH
-                LAST_COMMIT_DATE=$(git log -1 --format=%cd)
-                env UPDATED_BRANCHES="${UPDATED_BRANCHES} - [$BRANCH]($GITHUB_SERVER_URL/${{ github.repository }}/tree/$BRANCH): $NUM_COMMITS new commits since last sync, last synced at $LAST_COMMIT_DATE\n"
-                git pull origin $BRANCH
-                git push origin $BRANCH
-              fi
-            fi
-          done
-
-      - name: Create issue with branch sync information
-        if: env.UPDATED_BRANCHES != ''
-        uses: actions/github-script@v4
-        with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          script: |
-            const { context, github } = require('@actions/github');
-            const repoName = context.repo.repo;
-            const owner = context.repo.owner;
-            const branchInfo = `
-            The following branches have been synced successfully in [${repoName}](https://github.com/${owner}/${repoName}):
-
-            ${process.env.UPDATED_BRANCHES}
-            `;
-            github.issues.create({
-              owner: owner,
-              repo: repoName,
-              title: 'Branches Synced Successfully',
-              body: branchInfo
-            });
+#      - name: Sync branches and collect commit information
+#        run: |
+#          for BRANCH in $ORIGINAL_BRANCHES; do
+#            if git rev-parse --verify --quiet $BRANCH; then
+#              NUM_COMMITS=$(git rev-list --count HEAD ^origin/$BRANCH)
+#              if [ $NUM_COMMITS -gt 0 ]; then
+#                git checkout $BRANCH
+#                LAST_COMMIT_DATE=$(git log -1 --format=%cd)
+#                env UPDATED_BRANCHES="${UPDATED_BRANCHES} - [$BRANCH]#($GITHUB_SERVER_URL/${{ github.repository }}/tree/$BRANCH): #$NUM_COMMITS new commits since last sync, last synced at #$LAST_COMMIT_DATE\n"
+#                git pull origin $BRANCH
+#                git push origin $BRANCH
+#              fi
+#            fi
+#          done
+#
+#      - name: Create issue with branch sync information
+#        if: env.UPDATED_BRANCHES != ''
+#        uses: actions/github-script@v4
+#        with:
+#          github-token: ${{ secrets.GITHUB_TOKEN }}
+#          script: |
+#            const { context, github } = require('@actions/github');
+#            const repoName = context.repo.repo;
+#            const owner = context.repo.owner;
+#            const branchInfo = `
+#            The following branches have been synced successfully in [${repoName}]#(https://github.com/${owner}/${repoName}):
+#
+#            ${process.env.UPDATED_BRANCHES}
+#            `;
+#            github.issues.create({
+#              owner: owner,
+#              repo: repoName,
+#              title: 'Branches Synced Successfully',
+#              body: branchInfo
+#            });
