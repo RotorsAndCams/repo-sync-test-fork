@@ -7,6 +7,9 @@ jobs:
   sync-branches-and-notify:
     runs-on: ubuntu-latest
 
+    env:
+      UPDATED_BRANCHES: ''
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v2
@@ -20,14 +23,13 @@ jobs:
 
       - name: Sync branches and collect commit information
         run: |
-          UPDATED_BRANCHES = "0"
           for BRANCH in $ORIGINAL_BRANCHES; do
             if git rev-parse --verify --quiet $BRANCH; then
               NUM_COMMITS=$(git rev-list --count HEAD ^origin/$BRANCH)
               if [ $NUM_COMMITS -gt 0 ]; then
                 git checkout $BRANCH
                 LAST_COMMIT_DATE=$(git log -1 --format=%cd)
-                UPDATED_BRANCHES="${UPDATED_BRANCHES} - [$BRANCH]($GITHUB_SERVER_URL/${{ github.repository }}/tree/$BRANCH): $NUM_COMMITS new commits since last sync, last synced at $LAST_COMMIT_DATE\n"
+                export UPDATED_BRANCHES="${UPDATED_BRANCHES} - [$BRANCH]($GITHUB_SERVER_URL/${{ github.repository }}/tree/$BRANCH): $NUM_COMMITS new commits since last sync, last synced at $LAST_COMMIT_DATE\n"
                 git pull origin $BRANCH
                 git push origin $BRANCH
               fi
@@ -35,7 +37,7 @@ jobs:
           done
 
       - name: Create issue with branch sync information
-        if: $UPDATED_BRANCHES != '0'
+        if: env.UPDATED_BRANCHES != ''
         uses: actions/github-script@v4
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
@@ -46,7 +48,7 @@ jobs:
             const branchInfo = `
             The following branches have been synced successfully in [${repoName}](https://github.com/${owner}/${repoName}):
 
-            ${UPDATED_BRANCHES}
+            ${process.env.UPDATED_BRANCHES}
             `;
             github.issues.create({
               owner: owner,
